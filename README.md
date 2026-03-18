@@ -10,7 +10,7 @@ This repository contains the implementation of the domain layer for Cithara, foc
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository_url>
+   git clone [repository_url](https://github.com/Yon64/cithara.git)
    cd cithara
    ```
 
