@@ -55,4 +55,4 @@ As required by Exercise 3, here is a summary of the domain entities supported by
 3. **Update**: Any field can be edited; `share_token` is generated automatically and remains read-only.
 4. **Delete**: Songs and playlists can be removed from the database.
 
-*Note: Screenshots or a demo video should be added here for final submission.*
+*Link of vidéo : https://drive.google.com/file/d/12f91Hi2g0p1lRL1pgY-dwBuun6EZz4Qb/view?usp=sharing*
