@@ -44,7 +44,11 @@ This repository contains the implementation of the domain layer for Cithara, foc
 - **User**: Standard Django user.
 - **Playlist**: Groups songs for a user.
 - **Song**: Stores AI generation parameters, status, and audio references.
-    - **New Fields**: `reference_url`, `audio_format` (MP3/M4A), and `share_token` (UUID).
+    - **New Fields**: 
+        - `audio_format`: (MP3/M4A). Justification: Provides flexibility for users to choose between standard compatibility (MP3) and optimized quality/size (M4A).
+        - `reference_url`: Optional reference song URL. Justification: Enables users to provide stylistic or melodic inspiration for the AI, significantly improving the output's relevance.
+        - `singer_gender`: Includes 'Non-binary'. Justification: Ensures inclusivity and broadens the creative possibilities for vocal generation.
+        - `share_token`: (UUID). Justification: Provides a secure, unique identifier for public sharing without exposing internal database IDs.
 
 ### CRUD Evidence
 
@@ -55,4 +59,4 @@ As required by Exercise 3, here is a summary of the domain entities supported by
 3. **Update**: Any field can be edited; `share_token` is generated automatically and remains read-only.
 4. **Delete**: Songs and playlists can be removed from the database.
 
-*Link of vidéo : https://drive.google.com/file/d/12f91Hi2g0p1lRL1pgY-dwBuun6EZz4Qb/view?usp=sharing*
+*Link of vidéo : https://drive.google.com/file/d/1YsP_fViyEK5ehwbaKoeYi_uxygHL6xJq/view?usp=sharing*
