@@ -59,6 +59,7 @@ class Song(models.Model):
     audio_format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='MP3')
     duration = models.DurationField(blank=True, null=True)
     share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    suno_id = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='songs')
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='songs', blank=True, null=True)
