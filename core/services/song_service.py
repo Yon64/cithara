@@ -1,19 +1,20 @@
 from ..models.song import Song
-from ..infrastructure.suno_client import SunoClient
+from ..infrastructure.strategies import get_song_generator_strategy
 from django.db import transaction
 
 class SongGenerationService:
     """
     Application layer service for song generation.
-    Orchestrates the domain model and infrastructure client.
+    Uses the Strategy Pattern to support multiple generation backends.
     """
     
-    def __init__(self, suno_client=None):
-        self.suno_client = suno_client or SunoClient()
+    def __init__(self, strategy=None):
+        # The strategy can be injected, or fetched from the factory by default
+        self.strategy = strategy or get_song_generator_strategy()
 
     def generate_song(self, user, title, prompt, genre, mood, occasion, singer_gender, audio_format='MP3'):
         """
-        Main use case: Generate a song for a user.
+        Main use case: Generate a song for a user using the active strategy.
         """
         # 1. Create Song in 'Generating' status
         song = Song.objects.create(
@@ -29,23 +30,59 @@ class SongGenerationService:
         )
         
         try:
-            # 2. Call SUNO API via Infrastructure client
-            result = self.suno_client.generate(
+            # 2. Call the active strategy
+            result = self.strategy.generate(
                 prompt=prompt,
                 genre=genre,
-                mood=mood
+                mood=mood,
+                title=title
             )
             
             # 3. Update Song with results
+            # The strategy returns a dictionary with 'suno_id' and initial 'status'
             song.suno_id = result.get('suno_id')
-            song.audio_url = result.get('audio_url')
-            song.status = 'Ready'
+            
+            # If the strategy returns an audio_url immediately (like Mock), use it
+            if result.get('audio_url'):
+                song.audio_url = result.get('audio_url')
+            
+            # Update status based on strategy result
+            song.status = result.get('status', 'Generating')
             song.save()
-            
             return song
-            
         except Exception as e:
-            # Handle failure
             song.status = 'Failed'
             song.save()
             raise e
+
+    def update_song_status(self, song_id):
+        """
+        Polls the strategy for the latest status and updates the song in DB.
+        """
+        song = Song.objects.get(id=song_id)
+        
+        # If already Ready or Failed, no need to poll
+        if song.status in ['Ready', 'Failed']:
+            return song
+
+        # If we don't have a suno_id, we can't poll
+        if not song.suno_id:
+            return song
+
+        try:
+            # Call the strategy to get the latest status
+            result = self.strategy.get_status(song.suno_id)
+            
+            # Update song fields
+            song.status = result.get('status', song.status)
+            if result.get('audio_url'):
+                song.audio_url = result.get('audio_url')
+            
+            song.save()
+            
+            # Add raw status for UI feedback
+            song.raw_status = result.get('raw_status')
+            return song
+        except Exception as e:
+            print(f"Error updating song status: {e}")
+            return song

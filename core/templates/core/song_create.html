@@ -1,0 +1,237 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Create New Song - Cithara{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h2>Compose Your Masterpiece</h2>
+        <p>Harness the power of AI to create custom tracks in seconds.</p>
+    </div>
+</section>
+
+<section class="creation-area">
+    <div class="glass-card">
+        <form id="song-form">
+            {% csrf_token %}
+            <div class="form-group full-width">
+                <label for="title">Song Title</label>
+                <input type="text" id="title" name="title" placeholder="e.g., Midnight Rain" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="prompt">Creative Prompt</label>
+                <textarea id="prompt" name="prompt" rows="3" placeholder="Describe the style, rhythm, and theme..." required></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <select id="genre" name="genre">
+                        {% for value, label in genres %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mood">Mood</label>
+                    <select id="mood" name="mood">
+                        {% for value, label in moods %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="occasion">Occasion</label>
+                    <select id="occasion" name="occasion">
+                        {% for value, label in occasions %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="singer_gender">Singer Gender</label>
+                    <select id="singer_gender" name="singer_gender">
+                        {% for value, label in genders %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" id="generate-btn" class="primary-btn">
+                <span class="btn-text">Generate Song</span>
+                <span class="spinner hidden"></span>
+            </button>
+        </form>
+
+        <div id="result-container" class="hidden">
+            <div id="loading-header" class="status-header">
+                <span class="spinner large"></span>
+                <h3>Creating your masterpiece...</h3>
+            </div>
+
+            <div id="success-header" class="status-header hidden">
+                <span class="check-icon">✓</span>
+                <h3>Your song is ready!</h3>
+            </div>
+            
+            <div class="song-result-card">
+                <div class="song-info">
+                    <h4 id="result-title">Song Title</h4>
+                    <p id="result-status">Ready</p>
+                </div>
+                <div class="audio-player">
+                    <audio id="audio-element" controls>
+                        <source src="" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div class="share-area">
+                    <label>Share Token</label>
+                    <code id="result-token"></code>
+                </div>
+            </div>
+            
+            <button id="reset-btn" class="secondary-btn">Create Another</button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('song-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('generate-btn');
+        const spinner = btn.querySelector('.spinner');
+        const btnText = btn.querySelector('.btn-text');
+        
+        // UI State: Loading
+        btn.disabled = true;
+        btnText.textContent = 'Generating...';
+        spinner.classList.remove('hidden');
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('/api/generate-song/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': data.csrfmiddlewaretoken
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                showResult(result);
+            } else {
+                alert('Error: ' + (result.error || 'Something went wrong'));
+                resetUI();
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            alert('Service unavailable. Please try again later.');
+            resetUI();
+        }
+    });
+
+    function showResult(result) {
+        document.getElementById('song-form').classList.add('hidden');
+        document.getElementById('result-container').classList.remove('hidden');
+        
+        updateUI(result);
+
+        // Populate initial token if available
+        if (result.share_token) {
+            document.getElementById('result-token').textContent = result.share_token;
+        }
+
+        // If not ready, start polling
+        if (result.status !== 'Ready' && result.status !== 'Failed') {
+            pollStatus(result.id);
+        }
+    }
+
+    function updateUI(result) {
+        document.getElementById('result-title').textContent = result.title || 'Untitled';
+        
+        const statusEl = document.getElementById('result-status');
+        let statusText = 'Status: ' + result.status;
+        if (result.raw_status) {
+            statusText += ` (${result.raw_status})`;
+        }
+        if (result.share_token) {
+            document.getElementById('result-token').textContent = result.share_token;
+        }
+
+        const audio = document.getElementById('audio-element');
+        const successHeader = document.getElementById('success-header');
+        const loadingHeader = document.getElementById('loading-header');
+
+        if (result.status === 'Ready') {
+            successHeader.classList.remove('hidden');
+            loadingHeader.classList.add('hidden');
+            statusEl.style.color = '#22c55e'; // Success green
+        } else if (result.status === 'Failed') {
+            successHeader.classList.add('hidden');
+            loadingHeader.classList.add('hidden');
+            statusEl.style.color = '#ef4444'; // Red
+        } else {
+            successHeader.classList.add('hidden');
+            loadingHeader.classList.remove('hidden');
+            statusEl.style.color = 'var(--primary)';
+        }
+
+        if (result.audio_url) {
+            audio.src = result.audio_url;
+            audio.parentElement.classList.remove('hidden');
+        } else {
+            audio.parentElement.classList.add('hidden');
+        }
+    }
+
+    async function pollStatus(songId) {
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/song-status/${songId}/`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    updateUI(result);
+                    
+                    if (result.status === 'Ready' || result.status === 'Failed') {
+                        clearInterval(interval);
+                    }
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+                clearInterval(interval);
+            }
+        }, 3000); // Poll every 3 seconds
+    }
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        resetUI();
+        document.getElementById('song-form').reset();
+    });
+
+    function resetUI() {
+        const btn = document.getElementById('generate-btn');
+        btn.disabled = false;
+        btn.querySelector('.btn-text').textContent = 'Generate Song';
+        btn.querySelector('.spinner').classList.add('hidden');
+        
+        document.getElementById('song-form').classList.remove('hidden');
+        document.getElementById('result-container').classList.add('hidden');
+    }
+</script>
+{% endblock %}

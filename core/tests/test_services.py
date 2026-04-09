@@ -7,12 +7,12 @@ from ..models.song import Song
 class SongGenerationServiceTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='password')
-        self.mock_suno_client = MagicMock()
-        self.service = SongGenerationService(suno_client=self.mock_suno_client)
+        self.mock_strategy = MagicMock()
+        self.service = SongGenerationService(strategy=self.mock_strategy)
 
     def test_generate_song_success(self):
         # Setup mock return value
-        self.mock_suno_client.generate.return_value = {
+        self.mock_strategy.generate.return_value = {
             "suno_id": "test-suno-123",
             "audio_url": "http://example.com/audio.mp3",
             "status": "Ready"
@@ -34,11 +34,11 @@ class SongGenerationServiceTest(TestCase):
         self.assertEqual(song.status, "Ready")
         self.assertEqual(song.suno_id, "test-suno-123")
         self.assertEqual(song.audio_url, "http://example.com/audio.mp3")
-        self.mock_suno_client.generate.assert_called_once()
+        self.mock_strategy.generate.assert_called_once()
 
     def test_generate_song_failure(self):
         # Setup mock to raise exception
-        self.mock_suno_client.generate.side_effect = Exception("API Error")
+        self.mock_strategy.generate.side_effect = Exception("API Error")
 
         # Call service and assert exception
         with self.assertRaises(Exception):

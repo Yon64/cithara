@@ -116,3 +116,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Song Generation Strategy Configuration
+# Options: 'mock' (default), 'suno'
+GENERATOR_STRATEGY = 'suno'
+SUNO_API_TOKEN = '2d0b773df8b22f123d13f1b28b900479'
