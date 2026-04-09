@@ -39,7 +39,7 @@ This repository contains the implementation of the domain layer for Cithara, foc
    - Create a superuser: `python manage.py createsuperuser`
    - Go to `http://127.0.0.1:8000/admin/`
 7. **Access Cithara Creation Page:**
-   - Go to `http://127.0.0.1:8000/
+   - Go to `http://127.0.0.1:8000/`
 
 ### Domain Entities
 
