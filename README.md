@@ -38,7 +38,7 @@ This repository contains the implementation of the domain layer for Cithara, foc
 6. **Access Django Admin:**
    - Create a superuser: `python manage.py createsuperuser`
    - Go to `http://127.0.0.1:8000/admin/`
-7. **Access Cithara Creation Page:**
+7. **Access Cithara song creation page:**
    - Go to `http://127.0.0.1:8000/`
 
 ### Domain Entities
