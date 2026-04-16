@@ -2,11 +2,7 @@
 
 Cithara is a web-based platform that enables users to generate AI-powered music, manage personal song libraries, and share content.
 
-## Exercise 3: Implementing the Domain Layer Using Django
-
-This repository contains the implementation of the domain layer for Cithara, focusing on correct domain modeling and persistence using Django ORM.
-
-### Project Setup
+## Project Setup
 
 1. **Clone the repository:**
    ```bash
@@ -22,43 +18,59 @@ This repository contains the implementation of the domain layer for Cithara, foc
 
 3. **Install dependencies:**
    ```bash
-   pip install django
+   pip install django python-dotenv requests
    ```
 
-4. **Run migrations:**
+4. **Environment Configuration:**
+   Create a `.env` file in the root directory:
+   ```env
+   SECRET_KEY=your-django-secret-key
+   DEBUG=True
+   SUNO_API_TOKEN=your-suno-api-token
+   GENERATOR_STRATEGY=mock # or 'suno' for real generation
+   ```
+
+5. **Run migrations:**
    ```bash
    python manage.py migrate
    ```
 
-5. **Run the development server:**
+6. **Run the development server:**
    ```bash
    python manage.py runserver
    ```
 
-6. **Access Django Admin:**
-   - Create a superuser: `python manage.py createsuperuser`
-   - Go to `http://127.0.0.1:8000/admin/`
-7. **Access Cithara song creation page:**
-   - Go to `http://127.0.0.1:8000/`
+7. **Access Features:**
+   - **Main Page**: `http://127.0.0.1:8000/` (Song Creation)
+   - **Library**: `http://127.0.0.1:8000/library/` (Manage your tracks)
+   - **Django Admin**: `http://127.0.0.1:8000/admin/`
 
-### Domain Entities
+## Core Features
+
+### 1. AI Music Generation
+- Create custom tracks based on title, prompt, genre, mood, and occasion.
+- Support for different singer genders (Male, Female, Non-binary).
+- Real-time status tracking from 'Generating' to 'Ready'.
+
+### 2. Personal Library Management
+- **Advanced Filtering**: Filter your collection by mood, genre, occasion, status, or voice gender.
+- **Dynamic Sorting**: Organise by newest/oldest or alphabetically.
+- **Search**: Fast text-based search for track titles.
+- **Playlist Management**: Create custom playlists and organize your songs using a drag-and-drop-like interface or simple selectors.
+
+### 3. Public Sharing
+- **Secure Sharing**: Each song has a unique UUID `share_token`.
+- **Standalone Share Page**: Share songs via a dedicated minimalist link that features only the music and its metadata, perfect for a clean listening experience.
+- **Direct Link**: Quickly copy share links from the library or creation result.
+
+## Domain Entities
 
 - **User**: Standard Django user.
 - **Playlist**: Groups songs for a user.
 - **Song**: Stores AI generation parameters, status, and audio references.
-    - **New Fields**: 
-        - `audio_format`: (MP3/M4A). Justification: Provides flexibility for users to choose between standard compatibility (MP3) and optimized quality/size (M4A).
-        - `reference_url`: Optional reference song URL. Justification: Enables users to provide stylistic or melodic inspiration for the AI, significantly improving the output's relevance.
-        - `singer_gender`: Includes 'Non-binary'. Justification: Ensures inclusivity and broadens the creative possibilities for vocal generation.
-        - `share_token`: (UUID). Justification: Provides a secure, unique identifier for public sharing without exposing internal database IDs.
-
-### CRUD Evidence
-
-As required by Exercise 3, here is a summary of the domain entities supported by CRUD operations via Django Admin:
-
-1. **Create**: New songs can be created with AI parameters (mood, occasion, etc.).
-2. **Read**: Songs can be listed and filtered by status, mood, and format.
-3. **Update**: Any field can be edited; `share_token` is generated automatically and remains read-only.
-4. **Delete**: Songs and playlists can be removed from the database.
+    - `audio_format`: (MP3/M4A).
+    - `reference_url`: Optional reference song URL for inspiration.
+    - `singer_gender`: Inclusivity choices.
+    - `share_token`: (UUID) for secure public URLs.
 
 *Link of vidéo : https://drive.google.com/file/d/1YsP_fViyEK5ehwbaKoeYi_uxygHL6xJq/view?usp=sharing*

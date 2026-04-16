@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-8vn5oytdgo=8xy!@l6b(p9(#=f333)+qsk+0=u+&)=x1b^i4^p"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-default-fallback-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -119,5 +124,5 @@ STATIC_URL = "static/"
 
 # Song Generation Strategy Configuration
 # Options: 'mock' (default), 'suno'
-GENERATOR_STRATEGY = 'mock'
-SUNO_API_TOKEN = '2d0b773df8b22f123d13f1b28b900479'
+GENERATOR_STRATEGY = os.environ.get('GENERATOR_STRATEGY', 'mock')
+SUNO_API_TOKEN = os.environ.get('SUNO_API_TOKEN')
