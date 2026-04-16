@@ -119,5 +119,5 @@ STATIC_URL = "static/"
 
 # Song Generation Strategy Configuration
 # Options: 'mock' (default), 'suno'
-GENERATOR_STRATEGY = 'suno'
+GENERATOR_STRATEGY = 'mock'
 SUNO_API_TOKEN = '2d0b773df8b22f123d13f1b28b900479'

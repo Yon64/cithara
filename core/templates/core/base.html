@@ -19,8 +19,8 @@
                     <h1>Cithara</h1>
                 </div>
                 <div class="nav-links">
-                    <a href="/" class="active">Create</a>
-                    <a href="/admin/">Library</a>
+                    <a href="/" class="{% if request.path == '/' %}active{% endif %}">Create</a>
+                    <a href="/library/" class="{% if request.path == '/library/' %}active{% endif %}">Library</a>
                 </div>
             </nav>
         </header>

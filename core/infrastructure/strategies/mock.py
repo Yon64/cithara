@@ -6,7 +6,7 @@ class MockSongGeneratorStrategy(SongGeneratorStrategy):
     Mock strategy for offline development and deterministic testing.
     """
 
-    def generate(self, prompt, genre=None, mood=None, instrumental=False):
+    def generate(self, prompt, genre=None, mood=None, instrumental=False, title=None):
         """
         Returns a mock response immediately.
         """

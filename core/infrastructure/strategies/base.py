@@ -7,7 +7,7 @@ class SongGeneratorStrategy(ABC):
     """
 
     @abstractmethod
-    def generate(self, prompt, genre=None, mood=None, instrumental=False):
+    def generate(self, prompt, genre=None, mood=None, instrumental=False, title=None):
         """
         Triggers song generation.
         Returns a dictionary with generation result (e.g., suno_id, audio_url).

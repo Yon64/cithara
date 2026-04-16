@@ -1,0 +1,391 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Library - Cithara{% endblock %}
+
+{% block content %}
+<div class="library-container" style="max-width: 1400px; margin: 0 auto; padding: 20px; display: flex; gap: 30px;">
+    
+    <!-- Sidebar for Playlists -->
+    <aside class="library-sidebar" style="width: 250px; flex-shrink: 0; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; height: fit-content;">
+        <h3 style="margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            Playlists
+            <button onclick="createPlaylist()" style="background: none; border: 1px solid #ccc; color: inherit; padding: 2px 8px; border-radius: 10px; cursor: pointer; font-size: 0.8rem;">+ New</button>
+        </h3>
+        <ul id="playlistList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+            <li>
+                <button class="playlist-btn active" data-id="all" onclick="filterByPlaylist('all', this)" style="width: 100%; text-align: left; background: none; border: none; color: inherit; padding: 8px; cursor: pointer; border-radius: 4px; border-left: 3px solid transparent;">
+                    All Songs
+                </button>
+            </li>
+            {% for pl in playlists %}
+            <li>
+                <button class="playlist-btn" data-id="{{ pl.id }}" onclick="filterByPlaylist('{{ pl.id }}', this)" style="width: 100%; text-align: left; background: none; border: none; color: inherit; padding: 8px; cursor: pointer; border-radius: 4px; border-left: 3px solid transparent;">
+                    {{ pl.name }}
+                </button>
+            </li>
+            {% empty %}
+            <li id="noPlaylistsMsg" style="color: #aaa; font-size: 0.9rem; padding: 8px;">No playlists yet.</li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="library-main" style="flex-grow: 1;">
+        <div class="library-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 id="currentViewTitle">All Songs</h2>
+            <div class="library-filters" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="searchInput" placeholder="Search songs..." style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                <select id="moodFilter" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="">All Moods</option>
+                    {% for value, label in moods %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select id="genreFilter" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="">All Genres</option>
+                    {% for value, label in genres %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select id="occasionFilter" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="">All Occasions</option>
+                    {% for value, label in occasions %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select id="statusFilter" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="">All Status</option>
+                    {% for value, label in statuses %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select id="genderFilter" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="">All Voices</option>
+                    {% for value, label in genders %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select id="sortOrder" style="padding: 8px; border-radius: 4px; border: 1px solid #555; background: #1a1a2e; color: #eee;">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title-asc">Title A → Z</option>
+                    <option value="title-desc">Title Z → A</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="songs-grid" id="songsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for song in songs %}
+            <div class="song-card" 
+                 data-id="{{ song.id }}" 
+                 data-title="{{ song.title|lower }}" 
+                 data-mood="{{ song.mood }}" 
+                 data-genre="{{ song.genre }}"
+                 data-occasion="{{ song.occasion }}"
+                 data-status="{{ song.status }}"
+                 data-gender="{{ song.singer_gender }}"
+                 data-date="{{ song.created_at.timestamp }}"
+                 data-playlist-ids="{% for p in song.playlists.all %}{{ p.id }},{% endfor %}"
+                 style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; transition: transform 0.2s;">
+                
+                <div class="song-info">
+                    <h3 class="song-title" style="margin: 0 0 10px 0; font-size: 1.2rem; display: flex; justify-content: space-between;">
+                        <span class="title-text">{{ song.title }}</span>
+                        <span class="song-status" style="font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; background: {% if song.status == 'Ready' %}#4CAF50{% elif song.status == 'Generating' %}#FFC107{% else %}#9E9E9E{% endif %}; color: white;">
+                            {{ song.status }}
+                        </span>
+                    </h3>
+                    <p style="margin: 0; font-size: 0.9rem; color: #aaa; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        {{ song.genre }} • {{ song.mood }} • {{ song.occasion }}
+                    </p>
+                    <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.8rem; color: #aaa;">Playlists:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            {% for pl in song.playlists.all %}
+                            <span class="playlist-badge" style="font-size: 0.75rem; background: rgba(33, 150, 243, 0.2); border: 1px solid rgba(33, 150, 243, 0.5); padding: 2px 8px; border-radius: 12px; display: flex; align-items: center; gap: 5px;">
+                                {{ pl.name }}
+                                <button onclick="updateSongPlaylist('{{ song.id }}', '{{ pl.id }}', 'remove')" style="background: none; border: none; color: #ddd; cursor: pointer; padding: 0; font-size: 0.9rem;" title="Remove">&times;</button>
+                            </span>
+                            {% endfor %}
+                        </div>
+                        <select onchange="if(this.value) updateSongPlaylist('{{ song.id }}', this.value, 'add')" style="padding: 4px; border-radius: 4px; border: 1px solid #555; background: #222; color: #eee; font-size: 0.8rem;">
+                            <option value="">+ Add to playlist...</option>
+                            {% for pl in playlists %}
+                                {% if pl not in song.playlists.all %}
+                                <option value="{{ pl.id }}">{{ pl.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {% if song.status == 'Ready' and song.audio_url %}
+                <div class="song-player">
+                    <audio controls style="width: 100%; max-height: 40px;">
+                        <source src="{{ song.audio_url }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                {% elif song.status == 'Generating' %}
+                <div class="song-player" style="text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #aaa;">Generating... Please check back later.</p>
+                </div>
+                {% endif %}
+
+                <div class="song-actions" style="margin-top: auto; display: flex; gap: 10px; justify-content: space-between;">
+                    <div class="left-actions" style="display: flex; gap: 8px;">
+                        <button class="btn-rename" onclick="renameSong('{{ song.id }}', '{{ song.title|escapejs }}')" style="background: none; border: 1px solid #ccc; color: inherit; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Rename</button>
+                        <button class="btn-delete" onclick="deleteSong('{{ song.id }}')" style="background: none; border: 1px solid #f44336; color: #f44336; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Delete</button>
+                    </div>
+                    
+                    {% if song.status == 'Ready' and song.audio_url %}
+                    <div class="right-actions" style="display: flex; gap: 8px;">
+                        <button onclick="copyShareLink('{{ request.scheme }}://{{ request.get_host }}/song-status/{{ song.id }}/?token={{ song.share_token }}')" style="background: #2196F3; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Share</button>
+                        <a href="{{ song.audio_url }}" download="{{ song.title }}.mp3" target="_blank" style="background: #4CAF50; text-decoration: none; border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Download">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-songs" style="grid-column: 1 / -1; text-align: center; padding: 50px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+                <p>You haven't generated any songs yet.</p>
+                <a href="/" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 20px;">Create a Song</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    let currentPlaylistFilter = 'all';
+
+    async function createPlaylist() {
+        const name = prompt("Enter a name for your new playlist:");
+        if (name && name.trim() !== "") {
+            try {
+                const response = await fetch(`/api/playlists/create/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ name: name.trim() })
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const data = await response.json();
+                    alert("Failed to create playlist: " + data.error);
+                }
+            } catch (error) {
+                alert("Error creating playlist");
+            }
+        }
+    }
+
+    async function updateSongPlaylist(songId, playlistId, action) {
+        try {
+            const response = await fetch(`/api/songs/${songId}/playlist/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ playlist_id: playlistId, action: action })
+            });
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert("Failed to update playlist assignment.");
+            }
+        } catch (error) {
+            alert("Error updating playlist");
+        }
+    }
+
+    function filterByPlaylist(playlistId, btn) {
+        // Update active button styling
+        document.querySelectorAll('.playlist-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.borderLeftColor = 'transparent';
+        });
+        btn.classList.add('active');
+        btn.style.borderLeftColor = '#2196F3';
+
+        // Update Title
+        document.getElementById('currentViewTitle').innerText = btn.innerText.trim();
+
+        currentPlaylistFilter = playlistId;
+        updateView();
+    }
+
+    // Include existing JS
+    async function renameSong(songId, currentTitle) {
+        const newTitle = prompt("Enter new title for the song:", currentTitle);
+        if (newTitle && newTitle.trim() !== "" && newTitle !== currentTitle) {
+            try {
+                const response = await fetch(`/api/songs/${songId}/rename/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ title: newTitle.trim() })
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const data = await response.json();
+                    alert("Failed to rename: " + data.error);
+                }
+            } catch (error) {
+                alert("Error renaming song");
+            }
+        }
+    }
+
+    async function deleteSong(songId) {
+        if (confirm("Are you sure you want to delete this song?")) {
+            try {
+                const response = await fetch(`/api/songs/${songId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    }
+                });
+                if (response.ok) {
+                    const card = document.querySelector(`.song-card[data-id="${songId}"]`);
+                    if(card) {
+                        card.style.opacity = '0';
+                        setTimeout(() => card.remove(), 300);
+                    }
+                } else {
+                    alert("Failed to delete song.");
+                }
+            } catch (error) {
+                alert("Error deleting song");
+            }
+        }
+    }
+
+    function copyShareLink(link) {
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Sharing link copied to clipboard!');
+        }).catch(err => {
+            prompt("Copy this link:", link);
+        });
+    }
+
+    // Filtering and sorting logic
+    const searchInput = document.getElementById('searchInput');
+    const moodFilter = document.getElementById('moodFilter');
+    const genreFilter = document.getElementById('genreFilter');
+    const occasionFilter = document.getElementById('occasionFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    const sortOrder = document.getElementById('sortOrder');
+    const songsGrid = document.getElementById('songsGrid');
+
+    function updateView() {
+        if(!songsGrid) return;
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedMood = moodFilter.value;
+        const selectedGenre = genreFilter.value;
+        const selectedOccasion = occasionFilter.value;
+        const selectedStatus = statusFilter.value;
+        const selectedGender = genderFilter.value;
+        const sortVal = sortOrder.value;
+        const playlistId = currentPlaylistFilter;
+        
+        const cards = Array.from(songsGrid.querySelectorAll('.song-card'));
+        
+        cards.forEach(card => {
+            const title = card.dataset.title;
+            const mood = card.dataset.mood;
+            const genre = card.dataset.genre;
+            const occasion = card.dataset.occasion;
+            const status = card.dataset.status;
+            const gender = card.dataset.gender;
+            const pIds = card.dataset.playlistIds || '';
+            
+            const matchesSearch = title.includes(searchTerm);
+            const matchesMood = selectedMood === "" || mood === selectedMood;
+            const matchesGenre = selectedGenre === "" || genre === selectedGenre;
+            const matchesOccasion = selectedOccasion === "" || occasion === selectedOccasion;
+            const matchesStatus = selectedStatus === "" || status === selectedStatus;
+            const matchesGender = selectedGender === "" || gender === selectedGender;
+            const matchesPlaylist = playlistId === 'all' || pIds.includes(playlistId + ',');
+            
+            if (matchesSearch && matchesMood && matchesGenre && matchesOccasion && matchesStatus && matchesGender && matchesPlaylist) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const visibleCards = cards.filter(card => card.style.display !== 'none');
+        
+        // Sort
+        visibleCards.sort((a, b) => {
+            if (sortVal === 'newest') {
+                return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+            } else if (sortVal === 'oldest') {
+                return parseFloat(a.dataset.date) - parseFloat(b.dataset.date);
+            } else if (sortVal === 'title-asc') {
+                return a.dataset.title.localeCompare(b.dataset.title);
+            } else if (sortVal === 'title-desc') {
+                return b.dataset.title.localeCompare(a.dataset.title);
+            }
+            return 0;
+        });
+
+        visibleCards.forEach(card => songsGrid.appendChild(card));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if(searchInput) searchInput.addEventListener('input', updateView);
+        if(moodFilter) moodFilter.addEventListener('change', updateView);
+        if(genreFilter) genreFilter.addEventListener('change', updateView);
+        if(occasionFilter) occasionFilter.addEventListener('change', updateView);
+        if(statusFilter) statusFilter.addEventListener('change', updateView);
+        if(genderFilter) genderFilter.addEventListener('change', updateView);
+        if(sortOrder) sortOrder.addEventListener('change', updateView);
+        
+        // Setup initial active state
+        const allBtn = document.querySelector('.playlist-btn[data-id="all"]');
+        if(allBtn) {
+            allBtn.style.borderLeftColor = '#2196F3';
+        }
+    });
+
+</script>
+<style>
+/* Hover effects */
+.song-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-rename:hover { background: rgba(255,255,255,0.1) !important; }
+.btn-delete:hover { background: rgba(244, 67, 54, 0.1) !important; }
+.playlist-btn:hover { background: rgba(255,255,255,0.05) !important; }
+</style>
+{% endblock %}

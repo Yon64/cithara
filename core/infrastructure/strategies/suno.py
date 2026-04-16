@@ -59,7 +59,7 @@ class SunoSongGeneratorStrategy(SongGeneratorStrategy):
 
             return {
                 "suno_id": task_id,
-                "status": "PENDING",
+                "status": "Generating",
                 "raw_response": data
             }
         except requests.exceptions.Timeout:
