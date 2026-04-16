@@ -140,7 +140,7 @@
                     
                     {% if song.status == 'Ready' and song.audio_url %}
                     <div class="right-actions" style="display: flex; gap: 8px;">
-                        <button onclick="copyShareLink('{{ request.scheme }}://{{ request.get_host }}/song-status/{{ song.id }}/?token={{ song.share_token }}')" style="background: #2196F3; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Share</button>
+                        <button onclick="copyShareLink('{{ request.scheme }}://{{ request.get_host }}/share/{{ song.share_token }}/')" style="background: #2196F3; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Share</button>
                         <a href="{{ song.audio_url }}" download="{{ song.title }}.mp3" target="_blank" style="background: #4CAF50; text-decoration: none; border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Download">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         </a>

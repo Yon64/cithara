@@ -91,8 +91,8 @@
                     </audio>
                 </div>
                 <div class="share-area">
-                    <label>Share Token</label>
-                    <code id="result-token"></code>
+                    <label>Share Link</label>
+                    <a id="result-token-link" href="#" target="_blank" style="color: #2196F3;"><code id="result-token"></code></a>
                 </div>
             </div>
             
@@ -152,7 +152,10 @@
 
         // Populate initial token if available
         if (result.share_token) {
-            document.getElementById('result-token').textContent = result.share_token;
+            const shareUrl = window.location.origin + '/share/' + result.share_token + '/';
+            document.getElementById('result-token').textContent = shareUrl;
+            const linkEl = document.getElementById('result-token-link');
+            if(linkEl) linkEl.href = shareUrl;
         }
 
         // If not ready, start polling
@@ -170,7 +173,10 @@
             statusText += ` (${result.raw_status})`;
         }
         if (result.share_token) {
-            document.getElementById('result-token').textContent = result.share_token;
+            const shareUrl = window.location.origin + '/share/' + result.share_token + '/';
+            document.getElementById('result-token').textContent = shareUrl;
+            const linkEl = document.getElementById('result-token-link');
+            if(linkEl) linkEl.href = shareUrl;
         }
 
         const audio = document.getElementById('audio-element');

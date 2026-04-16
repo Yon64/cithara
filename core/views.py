@@ -10,6 +10,15 @@ import json
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
+class SharePageView(TemplateView):
+    template_name = 'core/share.html'
+
+    def get_context_data(self, share_token, **kwargs):
+        context = super().get_context_data(**kwargs)
+        song = get_object_or_404(Song, share_token=share_token)
+        context['song'] = song
+        return context
+
 class SongCreatePageView(TemplateView):
     template_name = 'core/song_create.html'
 
