@@ -137,7 +137,7 @@ STATIC_URL = "static/"
 
 # Song Generation Strategy Configuration
 # Options: 'mock' (default), 'suno'
-GENERATOR_STRATEGY = os.environ.get('GENERATOR_STRATEGY', 'mock') # 'mock' or 'suno' for real generation
+GENERATOR_STRATEGY = os.environ.get('GENERATOR_STRATEGY', 'mock')
 SUNO_API_TOKEN = os.environ.get('SUNO_API_TOKEN')
 
 # Allauth / Social Account Settings
