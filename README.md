@@ -75,3 +75,4 @@ Cithara is a web-based platform that enables users to generate AI-powered music,
 
 *Link of vidéo 1 : https://drive.google.com/file/d/1YsP_fViyEK5ehwbaKoeYi_uxygHL6xJq/view?usp=sharing*
 *Link of vidéo 2 : https://drive.google.com/file/d/1yU-7zMLvrqiK5Kdu_bGuMtrCLP0f3dBA/view?usp=sharing*
+*Link of vidéo 3 : https://drive.google.com/file/d/1tq829RjmrgvD9rT6nE6WnGYpINQUZZRR/view?usp=sharing*
