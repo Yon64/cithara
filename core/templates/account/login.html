@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% load socialaccount %}
+
+{% block title %}Login - Cithara{% endblock %}
+
+{% block content %}
+<div class="login-container" style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div class="glass-card" style="max-width: 450px; width: 100%; padding: 50px; text-align: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+        <div class="login-header" style="margin-bottom: 40px;">
+            <span style="font-size: 3.5rem; display: block; margin-bottom: 15px;">🎵</span>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; margin: 0; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to Cithara</h2>
+            <p style="color: #888; margin-top: 10px;">Sign in to start creating and managing your AI music.</p>
+        </div>
+
+        <div class="login-actions">
+            {% if user.is_authenticated %}
+                <p>You are already logged in as <strong>{{ user.username }}</strong>.</p>
+                <a href="/" class="primary-btn" style="display: block; text-decoration: none;">Go to Studio</a>
+            {% else %}
+                <a href="{% provider_login_url 'google' %}" class="google-btn" style="display: flex; align-items: center; justify-content: center; gap: 12px; background: #fff; color: #000; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.1);">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 20px; height: 20px;">
+                    Continue with Google
+                </a>
+                
+                <p style="margin-top: 30px; font-size: 0.85rem; color: #666;">
+                    By continuing, you agree to our Terms of Service and Privacy Policy.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,255,255,0.2);
+    background: #f8f8f8;
+}
+.primary-btn {
+    background: #2196F3;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

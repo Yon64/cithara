@@ -17,10 +17,18 @@
                 <div class="logo">
                     <span class="logo-icon">🎵</span>
                     <h1>Cithara</h1>
+                    {% if user.is_authenticated %}
+                        <span class="user-greeting">Hi, {{ user.first_name|default:user.username }}!</span>
+                    {% endif %}
                 </div>
                 <div class="nav-links">
-                    <a href="/" class="{% if request.path == '/' %}active{% endif %}">Create</a>
-                    <a href="/library/" class="{% if request.path == '/library/' %}active{% endif %}">Library</a>
+                        <a href="/" class="{% if request.path == '/' %}active{% endif %}">Create</a>
+                    {% if user.is_authenticated %}
+                        <a href="/library/" class="{% if request.path == '/library/' %}active{% endif %}">Library</a>
+                        <a href="/accounts/logout/" class="logout-link">Logout</a>
+                    {% else %}
+                        <a href="/accounts/login/" class="login-link">Login</a>
+                    {% endif %}
                 </div>
             </nav>
         </header>

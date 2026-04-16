@@ -18,7 +18,7 @@ Cithara is a web-based platform that enables users to generate AI-powered music,
 
 3. **Install dependencies:**
    ```bash
-   pip install django python-dotenv requests
+   pip install django python-dotenv requests django-allauth pyjwt cryptography
    ```
 
 4. **Environment Configuration:**
@@ -28,6 +28,8 @@ Cithara is a web-based platform that enables users to generate AI-powered music,
    DEBUG=True
    SUNO_API_TOKEN=your-suno-api-token
    GENERATOR_STRATEGY=mock # or 'suno' for real generation
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
    ```
 
 5. **Run migrations:**
@@ -62,6 +64,11 @@ Cithara is a web-based platform that enables users to generate AI-powered music,
 - **Secure Sharing**: Each song has a unique UUID `share_token`.
 - **Standalone Share Page**: Share songs via a dedicated minimalist link that features only the music and its metadata, perfect for a clean listening experience.
 - **Direct Link**: Quickly copy share links from the library or creation result.
+
+### 4. Secure Authentication
+- **Google OAuth2 Integration**: Quick and secure login using Google accounts.
+- **User Privacy**: Each user has their own private library; songs and playlists are strictly associated with the owner.
+- **Modern Login Experience**: A dedicated, premium login interface.
 
 ## Domain Entities
 

@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .services.song_service import SongGenerationService
 from .models.song import Song
 from .models.playlist import Playlist
@@ -19,7 +20,7 @@ class SharePageView(TemplateView):
         context['song'] = song
         return context
 
-class SongCreatePageView(TemplateView):
+class SongCreatePageView(LoginRequiredMixin, TemplateView):
     template_name = 'core/song_create.html'
 
     def get_context_data(self, **kwargs):
@@ -36,11 +37,10 @@ class SongCreateView(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            # For simplicity, we'll use a hardcoded user or the first one if it exists
-            from django.contrib.auth.models import User
-            user = User.objects.first()
-            if not user:
-                user = User.objects.create_user(username='admin', password='password')
+            # Use the authenticated user
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({'error': 'Authentication required'}, status=401)
 
             service = SongGenerationService()
             song = service.generate_song(
@@ -80,18 +80,14 @@ class SongStatusView(View):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
-class LibraryPageView(TemplateView):
+class LibraryPageView(LoginRequiredMixin, TemplateView):
     template_name = 'core/library.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = User.objects.first()
-        if user:
-            context['songs'] = Song.objects.filter(user=user).prefetch_related('playlists').order_by('-created_at')
-            context['playlists'] = Playlist.objects.filter(user=user).order_by('-created_at')
-        else:
-            context['songs'] = []
-            context['playlists'] = []
+        user = self.request.user
+        context['songs'] = Song.objects.filter(user=user).prefetch_related('playlists').order_by('-created_at')
+        context['playlists'] = Playlist.objects.filter(user=user).order_by('-created_at')
         # Pass model choices for dynamic filter dropdowns 
         context['moods'] = Song.MOOD_CHOICES
         context['genres'] = Song.GENRE_CHOICES
@@ -105,9 +101,8 @@ class SongRenameView(View):
     def post(self, request, song_id, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            # Use a hardcoded user or the first one if it exists
-            user = User.objects.first()
-            if not user:
+            user = request.user
+            if not user.is_authenticated:
                 return JsonResponse({'error': 'Not authenticated'}, status=401)
             
             song = get_object_or_404(Song, id=song_id, user=user)
@@ -125,8 +120,8 @@ class SongRenameView(View):
 class SongDeleteView(View):
     def delete(self, request, song_id, *args, **kwargs):
         try:
-            user = User.objects.first()
-            if not user:
+            user = request.user
+            if not user.is_authenticated:
                 return JsonResponse({'error': 'Not authenticated'}, status=401)
             
             song = get_object_or_404(Song, id=song_id, user=user)
@@ -140,8 +135,8 @@ class PlaylistCreateView(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            user = User.objects.first()
-            if not user:
+            user = request.user
+            if not user.is_authenticated:
                 return JsonResponse({'error': 'Not authenticated'}, status=401)
             
             name = data.get('name')
@@ -158,8 +153,8 @@ class SongUpdatePlaylistView(View):
     def post(self, request, song_id, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            user = User.objects.first()
-            if not user:
+            user = request.user
+            if not user.is_authenticated:
                 return JsonResponse({'error': 'Not authenticated'}, status=401)
             
             song = get_object_or_404(Song, id=song_id, user=user)
