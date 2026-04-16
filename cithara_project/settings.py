@@ -124,5 +124,5 @@ STATIC_URL = "static/"
 
 # Song Generation Strategy Configuration
 # Options: 'mock' (default), 'suno'
-GENERATOR_STRATEGY = os.environ.get('GENERATOR_STRATEGY', 'mock')
+GENERATOR_STRATEGY = os.environ.get('GENERATOR_STRATEGY', 'mock') # 'mock' or 'suno' for real generation
 SUNO_API_TOKEN = os.environ.get('SUNO_API_TOKEN')
