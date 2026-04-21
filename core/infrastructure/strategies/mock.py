@@ -13,7 +13,7 @@ class MockSongGeneratorStrategy(SongGeneratorStrategy):
         suno_id = f"mock-{uuid.uuid4()}"
         return {
             "suno_id": suno_id,
-            "audio_url": "https://cdn1.suno.ai/sample1.mp3",
+            "audio_url": "/static/core/audio/mock_song.mp3",
             "status": "Ready",
             "metadata": {
                 "prompt": prompt,
@@ -30,5 +30,5 @@ class MockSongGeneratorStrategy(SongGeneratorStrategy):
         return {
             "suno_id": task_id,
             "status": "Ready",
-            "audio_url": "https://cdn1.suno.ai/sample1.mp3"
+            "audio_url": "/static/core/audio/mock_song.mp3"
         }

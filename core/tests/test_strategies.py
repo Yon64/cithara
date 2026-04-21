@@ -25,7 +25,7 @@ class MockStrategyTest(TestCase):
         result = self.strategy.generate(prompt="Test prompt")
         self.assertTrue(result['suno_id'].startswith("mock-"))
         self.assertEqual(result['status'], "Ready")
-        self.assertEqual(result['audio_url'], "https://cdn1.suno.ai/sample1.mp3")
+        self.assertEqual(result['audio_url'], "/static/core/audio/mock_song.mp3")
 
     def test_get_status_returns_ready(self):
         result = self.strategy.get_status("some-id")
